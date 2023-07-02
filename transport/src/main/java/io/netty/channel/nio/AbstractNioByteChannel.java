@@ -70,6 +70,9 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
         return METADATA;
     }
 
+    /**
+     * 与连接的字节数据读写相关
+     */
     protected class NioByteUnsafe extends AbstractNioUnsafe {
 
         private void closeOnRead(ChannelPipeline pipeline) {
@@ -103,10 +106,14 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
             }
         }
 
+        /**
+         * 连接字节数据流的读写
+         */
         @Override
         public final void read() {
             final ChannelConfig config = config();
             final ChannelPipeline pipeline = pipeline();
+            // 创建ByteBuf分配器
             final ByteBufAllocator allocator = config.getAllocator();
             final RecvByteBufAllocator.Handle allocHandle = recvBufAllocHandle();
             allocHandle.reset(config);
@@ -115,7 +122,9 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
             boolean close = false;
             try {
                 do {
+                    // 1. 分配一个ByteBuf
                     byteBuf = allocHandle.allocate(allocator);
+                    // 2. 将数据读取到分配的ByteBuf中
                     allocHandle.lastBytesRead(doReadBytes(byteBuf));
                     if (allocHandle.lastBytesRead() <= 0) {
                         // nothing was read. release the buffer.
@@ -127,6 +136,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
 
                     allocHandle.incMessagesRead(1);
                     readPending = false;
+                    // 3. 触发事件，将会引发ChannelPipeline的读事件传播
                     pipeline.fireChannelRead(byteBuf);
                     byteBuf = null;
                 } while (allocHandle.continueReading());
@@ -153,6 +163,11 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
         }
     }
 
+    /**
+     * 实际将字节流写到TCP缓冲区的方法是flush，最终会委托doWrite方法
+     * @param in
+     * @throws Exception
+     */
     @Override
     protected void doWrite(ChannelOutboundBuffer in) throws Exception {
         int writeSpinCount = -1;

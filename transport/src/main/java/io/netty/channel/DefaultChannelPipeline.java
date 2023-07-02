@@ -1031,6 +1031,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
     @Override
     public final ChannelFuture writeAndFlush(Object msg, ChannelPromise promise) {
+        // Outboud事件从这里开始传播
         return tail.writeAndFlush(msg, promise);
     }
 
@@ -1225,6 +1226,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+            // 发现ByteBuf或者decode之后的业务对象在ChannelPipeline流转过程中没有被消费，落到TailContext节点，就会发出警告
             onUnhandledInboundMessage(msg);
         }
 
@@ -1232,6 +1234,10 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         public void channelReadComplete(ChannelHandlerContext ctx) throws Exception { }
     }
 
+    /**
+     * 作为ChannelPipeline的头节点，开始传递读写事件，调用Unsafe进行实际的读写操作
+     * 关于写数据，最终都会落在HeadContext节点中的Unsafe来处理
+     */
     final class HeadContext extends AbstractChannelHandlerContext
             implements ChannelOutboundHandler, ChannelInboundHandler {
 

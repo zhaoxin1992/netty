@@ -55,6 +55,9 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
         super.doBeginRead();
     }
 
+    /**
+     * 与新连接建立操作相关
+     */
     private final class NioMessageUnsafe extends AbstractNioUnsafe {
 
         private final List<Object> readBuf = new ArrayList<Object>();
@@ -75,7 +78,7 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
             try {
                 try {
                     do {
-                        // 1. 设置NioSocketChannel
+                        // 1. 设置NioSocketChannel，委托NioServerSocketChannel处理
                         int localRead = doReadMessages(readBuf);
                         if (localRead == 0) {
                             break;

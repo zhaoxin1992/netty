@@ -199,6 +199,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
 
     @Override
     public ChannelHandlerContext fireChannelActive() {
+        // 找到下一个Inbound节点
         final AbstractChannelHandlerContext next = findContextInbound();
         invokeChannelActive(next);
         return this;
@@ -372,6 +373,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
             try {
                 ((ChannelInboundHandler) handler()).channelRead(this, msg);
             } catch (Throwable t) {
+                // handler的异常优先由此handler的exceptionCaught方法来处理，如果没有，则调用ChannelInboundhandleradapter的exceptionCaught方法
                 notifyHandlerException(t);
             }
         } else {
@@ -824,6 +826,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
      * @param promise
      */
     private void write(Object msg, boolean flush, ChannelPromise promise) {
+        // 找下一个Outbound节点
         AbstractChannelHandlerContext next = findContextOutbound();
         final Object m = pipeline.touch(msg, next);
         EventExecutor executor = next.executor();
