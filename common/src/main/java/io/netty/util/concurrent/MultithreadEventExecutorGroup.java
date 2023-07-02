@@ -138,6 +138,8 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
 
     @Override
     public EventExecutor next() {
+        // 从NioEventLoopGroup中，选择一个NioEventLoop，所以最终childGroup.register(child)会调用NioEventLoop的
+        // register方法，由其父类SingleThreadEventLoop来实现
         return chooser.next();
     }
 

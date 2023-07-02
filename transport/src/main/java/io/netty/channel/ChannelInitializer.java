@@ -94,6 +94,7 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
 
     /**
      * {@inheritDoc} If override this method ensure you call super!
+     * invokeHandlerAddedIfNeeded最终会调用此方法
      */
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
@@ -106,6 +107,12 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
         }
     }
 
+    /**
+     * handlerAdded 方法调用initChannel方法后，调用remove(ctx)将自身删除
+     * @param ctx
+     * @return
+     * @throws Exception
+     */
     @SuppressWarnings("unchecked")
     private boolean initChannel(ChannelHandlerContext ctx) throws Exception {
         if (initMap.putIfAbsent(ctx, Boolean.TRUE) == null) { // Guard against re-entrance.

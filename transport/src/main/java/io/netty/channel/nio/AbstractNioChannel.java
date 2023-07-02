@@ -79,6 +79,8 @@ public abstract class AbstractNioChannel extends AbstractChannel {
      * @param parent            the parent {@link Channel} by which this instance was created. May be {@code null}
      * @param ch                the underlying {@link SelectableChannel} on which it operates
      * @param readInterestOp    the ops to set to receive data from the {@link SelectableChannel}
+     *                          基于AbstractChannel做了NIO相关的一些操作，保存JDK底层的SelectableChannel的引用，
+     *                          并且在构造方法中设置Channel为非阻塞。
      */
     protected AbstractNioChannel(Channel parent, SelectableChannel ch, int readInterestOp) {
         super(parent);
@@ -407,6 +409,10 @@ public abstract class AbstractNioChannel extends AbstractChannel {
         eventLoop().cancel(selectionKey());
     }
 
+    /**
+     * 客户端注册读事件后，最终会调用如下代码
+     * @throws Exception
+     */
     @Override
     protected void doBeginRead() throws Exception {
         // Channel.read() or ChannelHandlerContext.read() was called
